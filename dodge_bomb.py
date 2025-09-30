@@ -135,8 +135,6 @@ def main():
         #     sum_mv[0] -= 5
         # if key_lst[pg.K_RIGHT]:
         #     sum_mv[0] += 5
-
-        kk_img = kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
@@ -156,6 +154,8 @@ def main():
         if kk_rct.colliderect(bb_rct):
             gameover(screen)
             return # こうかとんが赤い爆弾に当たったらゲームオーバー
+        
+        kk_img = kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
 
         pg.display.update()
         tmr += 1
