@@ -14,10 +14,25 @@ DELTA = {
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    爆弾の画像Surfaceと加速度を格納したリストを作成する
+    戻り値：爆弾の画像Surfaceを格納したリスト、爆弾の加速度を格納したリスト
+    """
+    bb_imgs = [] # 爆弾の画像Surfaceを格納するリスト
+    bb_accs = [a for a in range(1, 11)] # 爆弾の加速度を格納するリスト
+    for r in range(1,11): # 爆弾の速度を1から10まで変化させる
+        bb_img = pg.Surface((20*r, 20*r)) # 爆弾の画像Surfaceを作成する
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r) # 爆弾の画像を描画する
+        bb_imgs.append(bb_img) # 爆弾の画像Surfaceをリストに追加する
+        bb_img.set_colorkey((0, 0, 0)) # 赤い爆弾の背景を透明にする
+    return bb_imgs, bb_accs
+
+
 def gameover(screen: pg.Surface) -> None:
     """
-    ゲームオーバーを表示する
     画面中央に「GAME OVER」と表示する
+    「GAME OVER」の左右に泣いたこうかとんの画像を表示する
     五秒間表示した後、プログラムを終了する
     """
     gameover_sfc = pg.Surface((WIDTH, HEIGHT)) #からのSurfaceを作成する
@@ -26,18 +41,17 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(gameover_sfc, (0, 0)) # 画面に貼り付ける 
     font = pg.font.Font(None, 100) # フォントのサイズ決め
     text = font.render("GAME OVER", True, (255, 255, 255)) # ゲームオーバーを白色で表示
-    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2)) # 画面中央に表示
+    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2)) # 画面中央に表示
     screen.blit(text, text_rect)
     gameover_kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0) # 泣いたこうかとんの画像
-    gameover_kk_rect_1 = gameover_kk_img.get_rect(center=(WIDTH // 2 -300, HEIGHT // 2 )) # 画面左に表示
-    gameover_kk_rect_2 = gameover_kk_img.get_rect(center=(WIDTH // 2 +300, HEIGHT // 2 )) # 画面右に表示
+    gameover_kk_rect_1 = gameover_kk_img.get_rect(center=(WIDTH / 2 -300, HEIGHT / 2 )) # 画面左に表示
+    gameover_kk_rect_2 = gameover_kk_img.get_rect(center=(WIDTH / 2 +300, HEIGHT / 2 )) # 画面右に表示
     screen.blit(gameover_kk_img, gameover_kk_rect_1)
     screen.blit(gameover_kk_img, gameover_kk_rect_2)
     pg.display.update() # 画面を更新する    
     time.sleep(5) # 5秒間表示する
 
 
-    
 def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRect or 爆弾Rect
@@ -67,9 +81,11 @@ def main():
     bb_rct = bb_img.get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
 
-    vx, vy = +20, +20   # 赤い爆弾の速度
+    vx, vy = +5, +5  # 赤い爆弾の速度
     clock = pg.time.Clock()
     tmr = 0
+
+    bb_imgs, bb_accs = init_bb_imgs() # 爆弾の画像Surfaceと加速度を格納したリストを取得する
 
     while True:
         for event in pg.event.get():
@@ -100,7 +116,10 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
-        bb_rct.move_ip(vx, vy) 
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)] 
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko: # 横方向にはみ出していたら
             vx *= -1
@@ -108,7 +127,9 @@ def main():
             vy *= -1
         screen.blit(bb_img, bb_rct) # 赤い爆弾を画面に貼り付ける
 
-        gameover(screen) if kk_rct.colliderect(bb_rct) else None # こうかとんが赤い爆弾に当たったらゲームオーバ
+        if kk_rct.colliderect(bb_rct):
+            gameover(screen)
+            return # こうかとんが赤い爆弾に当たったらゲームオーバー
 
         pg.display.update()
         tmr += 1
