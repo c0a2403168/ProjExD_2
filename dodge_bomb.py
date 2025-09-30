@@ -43,7 +43,7 @@ def main():
     bb_rct = bb_img.get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
 
-    vx, vy = +10, +10   # 赤い爆弾の速度
+    vx, vy = +20, +20   # 赤い爆弾の速度
     clock = pg.time.Clock()
     tmr = 0
 
@@ -52,6 +52,9 @@ def main():
             if event.type == pg.QUIT: 
                 return
         screen.blit(bg_img, [0, 0]) 
+
+        if kk_rct.colliderect(bb_rct): # こうかとんが赤い爆弾に当たったら
+            return # ゲームオーバー
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
@@ -72,6 +75,7 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
+
         bb_rct.move_ip(vx, vy) 
         yoko, tate = check_bound(bb_rct)
         if not yoko: # 横方向にはみ出していたら
@@ -79,6 +83,7 @@ def main():
         if not tate: # 縦方向にはみ出していたら
             vy *= -1
         screen.blit(bb_img, bb_rct) # 赤い爆弾を画面に貼り付ける
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
