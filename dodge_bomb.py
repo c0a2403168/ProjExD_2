@@ -14,6 +14,29 @@ DELTA = {
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+
+    """
+    kk_img0 = pg.image.load("fig/3.png")
+    kk_img0 = pg.transform.rotozoom(kk_img0, 0, 0.9) #オリジナル
+    
+    kk_img1 = pg.transform.flip(kk_img0, True, False) #左右反転した画像
+
+    kk_imgs = {
+        (0, 0):    kk_img0,                                 # 静止（左向きのまま）
+        (5, 0):    kk_img1,                                 # 右（反転させた画像）
+        (5, -5):   pg.transform.rotozoom(kk_img1, 45, 1.0), # 右上
+        (0, -5):   pg.transform.rotozoom(kk_img1, 90, 1.0), # 上
+        (-5, -5):  pg.transform.rotozoom(kk_img0, -45, 1.0),# 左上
+        (-5, 0):   kk_img0,                                 # 左（元の画像）
+        (-5, 5):   pg.transform.rotozoom(kk_img0, 45, 1.0), # 左下
+        (0, 5):    pg.transform.rotozoom(kk_img0, 90, 1.0), # 下
+        (5, 5):    pg.transform.rotozoom(kk_img1, -45, 1.0) # 右下
+    }
+    return kk_imgs
+
+
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     """
     爆弾の画像Surfaceと加速度を格納したリストを作成する
@@ -71,9 +94,10 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
 
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
-    kk_rct = kk_img.get_rect()
-    kk_rct.center = 300, 200
+    # こうかとんの向き
+    kk_imgs = get_kk_imgs() # こうかとん画像辞書を取得
+    kk_img = kk_imgs[(0, 0)] # 初期状態（静止）の画像
+    kk_rct = kk_img.get_rect(center=(300, 200))
 
     bb_img = pg.Surface((20, 20)) # 赤い爆弾の画像Surface
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10) # 赤い爆弾のRect
