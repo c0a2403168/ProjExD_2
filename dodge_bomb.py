@@ -26,6 +26,7 @@ def main():
     bb_img.set_colorkey((0, 0, 0)) # 赤い爆弾の背景を透明にする
     bb_rct = bb_img.get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
+    vx, vy = +10, +10   # 赤い爆弾の速度
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -51,6 +52,7 @@ def main():
 
         kk_rct.move_ip(sum_mv)
         screen.blit(kk_img, kk_rct)
+        bb_rct.move_ip(vx, vy) 
         screen.blit(bb_img, bb_rct) # 赤い爆弾を画面に貼り付ける
         pg.display.update()
         tmr += 1
